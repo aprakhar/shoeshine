@@ -1,7 +1,6 @@
 "use client";
 
-import Image from "next/image";
-import React, { useState, Fragment } from "react";
+import React, { useState } from "react";
 import Wheel from "@uiw/react-color-wheel";
 import { hsvaToHex } from "@uiw/color-convert";
 
@@ -11,23 +10,6 @@ const count_columns = 2;
 
 export default function Home() {
   const [hsva, setHsva] = useState({ h: 214, s: 43, v: 90, a: 1 });
-  // const led_row = [];
-  // for (let i = 0; i < count_columns; i++) {
-  //   const led_column: React.JSX.Element[] = [];
-  //   for (let j = 0; j < count_led_per_strip; j++) {
-  //     const key = `${i},${j}`;
-  //     led_column.push(
-  //       <div
-  //         key={key}
-  //         style={{
-  //           width: 10,
-  //           height: 14,
-  //           background: hsvaToHex(hsva),
-  //         }}
-  //       ></div>,
-  //     );
-  //   }
-  // }
 
   function createStrip(count: number = count_led_per_strip) {
     const ledStrip: React.JSX.Element[] = [];
@@ -93,16 +75,6 @@ export default function Home() {
           color={hsva}
           onChange={(color) => setHsva({ ...hsva, ...color.hsva })}
         />
-        <div
-          style={{
-            width: "100%",
-            height: 34,
-            marginTop: 20,
-            background: hsvaToHex(hsva),
-          }}
-        >
-          Chosen color
-        </div>
       </div>
       <div>{createRows()}</div>
     </main>
