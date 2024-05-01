@@ -4,7 +4,7 @@ import React, { useState } from "react";
 import Wheel from "@uiw/react-color-wheel";
 import { hsvaToHex } from "@uiw/color-convert";
 import { ColorResult } from "@uiw/color-convert";
-
+import toast, { Toaster } from "react-hot-toast";
 const count_led_per_strip = 10;
 const count_rows = 3;
 const count_columns = 2;
@@ -29,11 +29,35 @@ export default function Home() {
   const [hsva, setHsva] = useState(initialHsva);
   const [ledColors, setLedColors] = useState(initialLedColors);
 
-  function handleLedClick(r: number, c: number) {
-    const hex = hsvaToHex(hsva);
+  async function setColorOnStrip(r: number, c: number, hex: string) {
+    const body = [`r,${r}`, `c,${c}`, `color,${hex}`].join("\n");
+    const headers = {
+      "Content-type": "text/csv; charset=UTF-8",
+    };
+
+    let response;
+    try {
+      response = await fetch("http://localhost/color", {
+        method: "POST",
+        body,
+        headers,
+      });
+    } catch (error) {}
+
+    if (response === undefined || !response.ok) {
+      toast.error("Failed to apply colour.");
+      return;
+    }
+
     const key = `${r},${c}`;
     const newLedColors = { ...ledColors, [key]: hex };
     setLedColors(newLedColors);
+  }
+
+  function handleLedClick(r: number, c: number) {
+    const hex = hsvaToHex(hsva);
+
+    // setColorOnStrip(r, c, hex);
   }
 
   function createStrip(
@@ -117,11 +141,14 @@ export default function Home() {
   const leds: React.JSX.Element[] = createRows(count_rows, count_led_per_strip);
 
   return (
-    <main className="flex min-h-screen flex-col items-center justify-between p-24">
-      <div>
-        <Wheel color={hsva} onChange={handleWheelClick} />
-      </div>
-      <div>{leds}</div>
-    </main>
+    <>
+      <main className="flex min-h-screen flex-col items-center justify-between p-24">
+        <div>
+          <Wheel color={hsva} onChange={handleWheelClick} />
+        </div>
+        <div>{leds}</div>
+      </main>
+      <Toaster />
+    </>
   );
 }
