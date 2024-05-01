@@ -9,6 +9,7 @@ const count_led_per_strip = 10;
 const count_rows = 3;
 const count_columns = 2;
 const initialHsva = { h: 214, s: 43, v: 90, a: 1 };
+const initialHex = hsvaToHex(initialHsva);
 const led_size = 66;
 const ledButtonStyle = {
   width: led_size,
@@ -16,12 +17,23 @@ const ledButtonStyle = {
   borderRadius: "10%",
   margin: 5,
 };
+const initialLedColors: { [key: string]: string } = {};
+for (let i = 0; i < count_rows; i++) {
+  for (let j = 0; j < count_columns * count_led_per_strip; j++) {
+    const key = `${i},${j}`;
+    initialLedColors[key] = initialHex;
+  }
+}
 
 export default function Home() {
   const [hsva, setHsva] = useState(initialHsva);
+  const [ledColors, setLedColors] = useState(initialLedColors);
 
   function handleLedClick(r: number, c: number) {
-    console.log(r, c);
+    const hex = hsvaToHex(hsva);
+    const key = `${r},${c}`;
+    const newLedColors = { ...ledColors, [key]: hex };
+    setLedColors(newLedColors);
   }
 
   function createStrip(
@@ -35,10 +47,10 @@ export default function Home() {
       const r = id1;
       const c = id2 * count + i;
       const key = `${r},${c}`;
-      const background = hsvaToHex(initialHsva);
+      const background = initialHex;
       const style = {
         ...ledButtonStyle,
-        background: background,
+        background: ledColors[key],
       };
 
       ledStrip.push(
@@ -99,18 +111,17 @@ export default function Home() {
 
   function handleWheelClick(color: ColorResult) {
     const newColor = { ...hsva, ...color.hsva };
-    console.log("🚀 ~ handleWheelClick ~ newColor:", newColor);
     setHsva(newColor);
   }
 
-  const leds: React.JSX.Element = <div>{createRows(count_led_per_strip)}</div>;
+  const leds: React.JSX.Element[] = createRows(count_rows, count_led_per_strip);
 
   return (
     <main className="flex min-h-screen flex-col items-center justify-between p-24">
       <div>
         <Wheel color={hsva} onChange={handleWheelClick} />
       </div>
-      <div>{createRows(count_rows, count_led_per_strip)}</div>
+      <div>{leds}</div>
     </main>
   );
 }
